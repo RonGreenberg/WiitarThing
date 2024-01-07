@@ -16,6 +16,11 @@ namespace WiitarThing
 
             if (SingleInstance<App>.InitializeAsFirstInstance(Unique))
             {
+                // run the WiitarThing process in High priority, to prevent occasional delays in reading data from the guitar
+                //System.Diagnostics.Process myProcess = System.Diagnostics.Process.GetCurrentProcess();
+                //myProcess.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
+                //myProcess.PriorityClass = System.Diagnostics.ProcessPriorityClass.RealTime;
+
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
                 App.Main();
 

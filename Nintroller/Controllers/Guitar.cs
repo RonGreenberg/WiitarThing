@@ -441,6 +441,20 @@ namespace NintrollerLib
                 WhammyHigh = Math.Max(whammy, 0);
                 WhammyLow = Math.Min(whammy, 0);
 
+                //Console.WriteLine("Guitar Status");
+                //Console.WriteLine("-------------");
+                //Console.WriteLine("Green  : " + (G ? "ON" : "OFF"));
+                //Console.WriteLine("Red    : " + (R ? "ON" : "OFF"));
+                //Console.WriteLine("Yellow : " + (Y ? "ON" : "OFF"));
+                //Console.WriteLine("Blue   : " + (B ? "ON" : "OFF"));
+                //Console.WriteLine("Orange : " + (O ? "ON" : "OFF"));
+                //Console.WriteLine("Minus  : " + (Minus ? "ON" : "OFF"));
+                //Console.WriteLine("Plus   : " + (Plus ? "ON" : "OFF"));
+                //Console.WriteLine("Strum  : " + (Up ? "UP" : (Down ? "DOWN" : "MIDDLE")));
+                //Console.WriteLine("Whammy : " + currentWhammyValue.ToString());
+                //Console.WriteLine("Stick-X: " + Joy.rawX.ToString());
+                //Console.WriteLine("Stick-Y: " + Joy.rawY.ToString());
+                //Console.WriteLine();
 
                 //Console.Write("WII GUITAR:");
                 //Console.Write($"Frets:{(A ? "_" : "-")}{(B ? "_" : "-")}{(X ? "_" : "-")}{(Y ? "_" : "-")}{(ZL ? "_" : "-")}");

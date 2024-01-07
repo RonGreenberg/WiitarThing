@@ -200,6 +200,8 @@ namespace NintrollerLib
             Debug.WriteLineIf(result != (int)Win32Error.Success, $"Result was success but GetLastWin32Error returned {result} (\"{new Win32Exception(result).Message}\")");
 
             Debug.WriteLine($"Read: {BitConverter.ToString(m_readBuffer)}");
+            //Debug.WriteLine($"Read: {BitConverter.ToString(m_readBuffer)} at {DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}ms");
+            //Console.WriteLine($"Read: {BitConverter.ToString(m_readBuffer)} at {DateTime.Now.ToString("HH:mm:ss.fff")}");
 
             Array.Copy(m_readBuffer, 0, buffer, offset, Math.Min(m_readBuffer.Length, buffer.Length - offset));
             return (int)bytesRead;
@@ -230,6 +232,7 @@ namespace NintrollerLib
             }
 
             Debug.WriteLine($"Writing: {BitConverter.ToString(m_writeBuffer)}");
+            //Console.WriteLine($"Writing: {BitConverter.ToString(m_writeBuffer)} at {DateTime.Now.ToString("HH:mm:ss.fff")}");
 
             var waitHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
             var overlapped = new NativeOverlapped

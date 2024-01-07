@@ -755,22 +755,32 @@ namespace NintrollerLib
                             }
 
                             /* In case an unsolicited status report arrives when the controller type is already known to be a guitar,
-                               it can mean one of two things:
-                               1. The guitar was unplugged from the Wiimote (extension controller bit is 0). In this case we have to respond to this report
+                               it can mean one of three things:
+                               1. We are in Low Bandwidth mode, encryption is enabled and a report with extension controller bit = 1 was received.
+                                  Continuous reporting is disabled in Low Bandwidth mode when encryption is on, so the report was received because of a read timeout
+                                  that prompted WiitarThing to request status from the Wiimote. The received report should be ignored.
+                               2. The guitar was unplugged from the Wiimote (extension controller bit is 0). In this case we have to respond to this report
                                   like we normally would (perform steps to determine the updated controller type - Wiimote).
-                               2. Normally, the Nyko Frontman is recognized as a guitar, then we request the Wiimote to stream data periodically, then it sends reports
+                               3. Normally, the Nyko Frontman is recognized as a guitar, then we request the Wiimote to stream data periodically, then it sends reports
                                   where all extension bytes are 0x00, prompting us to setup guitar encryption. But sometimes it sends reports where all extension bytes
                                   are 0xFF, and a few seconds later a status report with extension controller bit = 1 is received. Repeating the extension discovery process
                                   WITHOUT INTERRUPTIONS has turned out to solve this issue.
                             */
                             if (_statusType == StatusType.Unknown && _currentType == ControllerType.Guitar)
                             {
-                                EncryptionEnabled = false; // in either case we start over, so no need to keep decrypting guitar bytes in data streams
                                 if ((report[3] & 0x02) != 0)
                                 {
-                                    // in the second case, we don't ignore the current report but we make sure to ignore subsequent reports by setting _state to null
+#if LOW_BANDWIDTH
+                                    if (_encryptionEnabled)
+                                    {
+                                        break;
+                                    }
+#endif
+                                    // in case 3, we don't ignore the current report but we make sure to ignore subsequent reports by setting _state to null
                                     _state = null;
                                 }
+
+                                EncryptionEnabled = false; // in cases 2-3 we start over, so no need to keep decrypting guitar bytes in data streams
                             }
 
                             // Battery Level
@@ -1368,7 +1378,21 @@ namespace NintrollerLib
                         case AcknowledgementType.EncryptionSetup_Step4:
                             _ackType = AcknowledgementType.NA;
                             EncryptionEnabled = true; // having completed encryption setup, we turn on the flag to start decrypting guitar bytes in the incoming data reports
+
+#if LOW_BANDWIDTH
+                            /* Send reports only when data has changed, at the cost of no tilt support (because data would constantly change, making the low bandwidth
+                               configuration worthless). Report only core buttons and extension bytes.
+                            */
+                            ApplyReportingType(InputReport.BtnsExt, false);
+#else
                             ApplyReportingType(InputReport.BtnsAccIRExt, true); // requesting the Wiimote to stream 0x37 data reports (the report type observed in GH3 Bluetooth traffic)
+#endif
+
+                            // redirect debug output to file starting now, to store all incoming guitar data
+                            //string outputFilename = AppDomain.CurrentDomain.BaseDirectory + "\\debug_output.txt";
+                            //Debug.Listeners.Add(new TextWriterTraceListener(outputFilename));
+                            //File.WriteAllText(outputFilename, string.Empty); // clear previous output from file
+                            //Debug.AutoFlush = true;
 
                             /* In the GH3 Bluetooth exchange, the game also requested calibration data from the Wiimote before requesting data streams and after
                                setting up encryption. I added this step as well, aiming to mimic the exchange as accurately as possible to make the Nyko Frontman work.
